@@ -1,0 +1,6 @@
+@Cw12_git_HostAddress = http://localhost:5236
+
+GET {{Cw12_git_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

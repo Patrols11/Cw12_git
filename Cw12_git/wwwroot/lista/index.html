@@ -1,0 +1,126 @@
+﻿<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="description" content="Lista rezerwacji">
+    <meta name="author" content="Franciszek Werner, Patryk Sawka">
+    <title>Lista Rezerwacji</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+
+        .lista {
+            text-align: center;
+            border: solid 1px black;
+            background-color: lightgray;
+        }
+
+        .reservation-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 10px;
+            border: solid 1px black;
+            background-color: lightgray;
+            padding:10px;
+        }
+
+        .reservation-card {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            background-color: #fff;
+            padding: 15px;
+            width: 300px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+            .reservation-card h3 {
+                margin: 0 0 10px;
+                font-size: 1.2em;
+                color: #007BFF;
+            }
+
+            .reservation-card p {
+                margin: 5px 0;
+                font-size: 0.9em;
+                color: #555;
+            }
+
+            .reservation-card .field {
+                font-weight: bold;
+            }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 0.8em;
+            color: #aaa;
+        }
+        .o {
+            text-align: center;
+            border: solid 1px black;
+            background-color: lightgray;
+            margin-top: 5px;
+            padding: 5px;
+        }
+        .a {
+            text-align: center;
+            border: solid 1px black;
+            background-color: aqua;
+            padding: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="lista"><h1>Lista Rezerwacji</h1></div>
+    
+    <div class="o">
+        <a class="a" href="../index.html">Dodaj rezerwacje</a>
+
+    </div>
+    <div class="reservation-container" id="reservationList"></div>
+
+
+
+    <script>
+        const loadReservations = () => {
+            fetch("../api/Rezerwacjas")
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Nie udało się pobrać rezerwacji.");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    const container = document.getElementById("reservationList");
+                    container.innerHTML = ""; // Wyczyść wcześniejsze dane
+                    data.forEach(reservation => {
+                        const card = document.createElement("div");
+                        card.className = "reservation-card";
+                        card.innerHTML = `
+                                <h3>Rezerwacja ID: ${reservation.id}</h3>
+                                <p><span class="field">Imię:</span> ${reservation.name}</p>
+                                <p><span class="field">Nazwisko:</span> ${reservation.surname}</p>
+                                <p><span class="field">Data:</span> ${reservation.date}</p>
+                                <p><span class="field">Godzina:</span> ${reservation.timeFrom}:00 - ${reservation.timeTo}:00</p>
+                                <p><span class="field">Telefon:</span> ${reservation.phone}</p>
+                                <p><span class="field">Email:</span> ${reservation.email}</p>
+                                <p><span class="field">Opis:</span> ${reservation.description}</p>
+                            `;
+                        container.appendChild(card);
+                    });
+                })
+                .catch(error => {
+                    alert("Wystąpił błąd: " + error.message);
+                });
+        };
+
+        // Inicjalne załadowanie rezerwacji
+        document.addEventListener("DOMContentLoaded", loadReservations);
+    </script>
+</body>
+</html>

@@ -1,0 +1,396 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="description" content="index">
+    <meta name="author" content="Franciszek Werner, Patryk Sawka">
+    <title>Strona Główna</title>
+    <style>
+        .lista {
+            text-align: center;
+            border: solid 1px black;
+            background-color: lightgray;
+        }
+
+        .o {
+            text-align: center;
+            border: solid 1px black;
+            background-color: lightgray;
+            margin-top: 5px;
+            padding: 10px;
+        }
+
+        .a {
+            text-align: center;
+            border: solid 1px black;
+            background-color: aqua;
+            padding: 4px;
+        }
+
+        #lista {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 5px;
+            background-color: rgb(170, 250, 245);
+        }
+
+            #lista p {
+                display: inline-block;
+                margin: 1px;
+                padding: 10px;
+                width: calc(95% / 7); /* Równy podział na 7 kolumn */
+                box-sizing: border-box;
+            }
+
+            #lista hr {
+                margin: 0;
+                border: none;
+                border-top: solid 1px;
+            }
+
+            #lista button {
+                border: none;
+                background-color: #D3D3D3; /* lekko szary */
+                cursor: pointer;
+                border: solid 1px;
+                padding: 5px;
+            }
+
+        #dodajForm {
+            text-align: center;
+            border: solid 1px black;
+            background-color: lightgray;
+            margin-top: 5px;
+            padding: 10px;
+        }
+
+        .error {
+            color: red;
+        }
+
+        .invalid {
+            border-color: red;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        
+        }
+        #autorzy {
+            text-align: center;
+            border: solid 1px black;
+            background-color: lightgray;
+            margin-top: 5px;
+            padding: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="lista"><h1>Lista Rezerwacji</h1></div>
+    <div class="o">
+        <span class="a" onclick="toggleForm('add')">Dodaj Rezerwację</span>
+        <a class="a" href="/lab/14/12/lista/index.html">Lista</a>
+        <span class="a" onclick="toggleToAutor('Autorzy')">O autorach</span>
+    </div>
+
+    <!-- Form for adding a new reservation -->
+    <div class="form">
+        <div style="display:none" id="dodajForm">
+            <h3>Dodawanie Rezerwacji</h3>
+            <div id="errorList" class="error"></div>
+            <label for="imie">Imię:</label><br />
+            <input type="text" id="Name" /><br />
+            <label for="nazwisko">Nazwisko:</label><br />
+            <input type="text" id="Surname" /><br />
+            <label for="data">Data (YYYY-MM-DD):</label><br />
+            <input type="date" id="Date" /><br />
+            <label for="od">Godzina Od (8-15):</label><br />
+            <input type="number" id="TimeFrom" min="8" max="15" /><br />
+            <label for="do">Godzina Do (8-15):</label><br />
+            <input type="number" id="TimeTo" min="8" max="15" /><br />
+            <label for="telefon">Telefon:</label><br />
+            <input type="text" id="Phone" /><br />
+            <label for="email">Email:</label><br />
+            <input type="email" id="Email" /><br />
+            <label for="opis">Opis:</label><br />
+            <textarea id="Description" rows="5" cols="30"></textarea><br />
+            <button id="addButton" onclick="validateAndSubmit('add')">Zapisz Rezerwację</button>
+            <button id="editButton" style="display:none" onclick="validateAndSubmit('edit')">Edytuj Rezerwację</button>
+            <button onclick="toggleForm()">Anuluj</button><br />
+            <span id="status"></span>
+        </div>
+    </div>
+
+    <div style="display:none" id="autorzy">
+    <h3>Stronę wykonali Patryk Sawka i Franciszek Werner</h3>
+    </div>
+    <div id="lista"></div>
+
+    <script>
+        const toggleForm = (action) => {
+            const form = document.getElementById("dodajForm");
+            form.style.display = form.style.display === "none" ? "block" : "none";
+            document.getElementById("addButton").style.display = action === 'add' ? 'inline-block' : 'none';
+            document.getElementById("editButton").style.display = action === 'edit' ? 'inline-block' : 'none';
+            document.getElementById("errorList").innerHTML = "";
+            const inputs = form.querySelectorAll("input, textarea");
+            inputs.forEach(input => input.classList.remove("invalid"));
+        };
+        const toggleToAutor = (action) => {
+            const form = document.getElementById("autorzy");
+            form.style.display = form.style.display === "none" ? "block" : "none";
+        };
+
+        const validateAndSubmit = (action) => {
+            const errors = [];
+            const now = new Date();
+            const dateInput = new Date(document.getElementById("Date").value);
+            const timeFrom = parseInt(document.getElementById("TimeFrom").value);
+            const timeTo = parseInt(document.getElementById("TimeTo").value);
+            const phone = document.getElementById("Phone").value;
+
+            const inputs = document.querySelectorAll("#dodajForm input, #dodajForm textarea");
+            inputs.forEach(input => input.classList.remove("invalid"));
+
+            if (!document.getElementById("Name").value) {
+                errors.push("Pole Imię jest wymagane.");
+                document.getElementById("Name").classList.add("invalid");
+            }
+
+            if (!document.getElementById("Surname").value) {
+                errors.push("Pole Nazwisko jest wymagane.");
+                document.getElementById("Surname").classList.add("invalid");
+            }
+
+            if (!document.getElementById("Date").value || dateInput < now) {
+                errors.push("Data nie może być wsteczna.");
+                document.getElementById("Date").classList.add("invalid");
+            }
+
+            if (isNaN(timeFrom) || timeFrom < 8 || timeFrom > 15) {
+                errors.push("Godzina od musi być w zakresie 8-15.");
+                document.getElementById("TimeFrom").classList.add("invalid");
+            }
+
+            if (isNaN(timeTo) || timeTo < 8 || timeTo > 15) {
+                errors.push("Godzina do musi być w zakresie 8-15.");
+                document.getElementById("TimeTo").classList.add("invalid");
+            }
+
+            if (timeTo - timeFrom !== 1) {
+                errors.push("Rezerwacja musi trwać dokładnie jedną godzinę.");
+                document.getElementById("TimeFrom").classList.add("invalid");
+                document.getElementById("TimeTo").classList.add("invalid");
+            }
+
+            if (!phone) {
+                errors.push("Pole Telefon jest wymagane.");
+                document.getElementById("Phone").classList.add("invalid");
+            }
+
+            if (errors.length > 0) {
+                document.getElementById("errorList").innerHTML = errors.join("<br>");
+                return;
+            }
+
+            // Walidacja konfliktu rezerwacji
+            checkReservationConflict(dateInput.toISOString().split('T')[0], timeFrom, timeTo)
+                .then(conflict => {
+                    if (conflict) {
+                        errors.push("Rezerwacja w tej godzinie i dniu już istnieje.");
+                        document.getElementById("TimeFrom").classList.add("invalid");
+                        document.getElementById("TimeTo").classList.add("invalid");
+                        document.getElementById("errorList").innerHTML = errors.join("<br>");
+                    } else {
+                        if (action === 'add') {
+                            add();
+                        } else if (action === 'edit') {
+                            const id = document.querySelector("button[onclick^='validateAndSubmit']").getAttribute("data-id");
+                            update(id);
+                        }
+                    }
+                });
+        };
+
+        const checkReservationConflict = (date, timeFrom, timeTo) => {
+            return fetch("api/Rezerwacjas")
+                .then(response => response.json())
+                .then(data => {
+                    return data.some(reservation =>
+                        reservation.date === date &&
+                        reservation.timeFrom === timeFrom &&
+                        reservation.timeTo === timeTo
+                    );
+                })
+                .catch(error => {
+                    console.log("Błąd podczas sprawdzania konfliktu rezerwacji:", error);
+                    return false;
+                });
+        };
+
+        const showRec = (data) => {
+            document.getElementById("lista").innerHTML =
+                "<b><p>Imię</p><p>Nazwisko</p><p>Data</p><p>Godzina Od</p><p>Godzina Do</p></b><hr>";
+            data.forEach(obj => {
+                if (obj) {
+                    document.getElementById("lista").innerHTML +=
+                        `
+                                    <p>${obj.name}</p>
+                                    <p>${obj.surname}</p>
+                                    <p>${obj.date}</p>
+                                    <p>${obj.timeFrom}</p>
+                                    <p>${obj.timeTo}</p>
+                                    
+                                    <p><button onclick="verifyPhone(${obj.id}, 'edit')">Edycja</button></p>
+                                    <p><button onclick="verifyPhone(${obj.id}, 'delete')">Usuń</button></p><hr>`;
+                }
+            });
+        };
+
+        const add = () => {
+            fetch("api/Rezerwacjas", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    Name: document.getElementById("Name").value,
+                    Surname: document.getElementById("Surname").value,
+                    Date: document.getElementById("Date").value,
+                    TimeFrom: parseInt(document.getElementById("TimeFrom").value),
+                    TimeTo: parseInt(document.getElementById("TimeTo").value),
+                    Phone: document.getElementById("Phone").value,
+                    Email: document.getElementById("Email").value,
+                    Description: document.getElementById("Description").value
+                })
+            })
+                .then(response => {
+                    if (response.ok) {
+                        document.getElementById("status").innerText = "Rezerwacja została dodana!";
+                        read();
+                        toggleForm(); // Hide the form after success
+                    } else {
+                        document.getElementById("status").innerText = "Wystąpił błąd!";
+                    }
+                })
+                .catch(error => console.log(error));
+        };
+
+        const verifyPhone = (id, action) => {
+            const phone = prompt("Podaj numer telefonu, aby kontynuować:");
+            fetch(`api/Rezerwacjas/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Nie znaleziono rezerwacji.");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.phone === phone) {
+                        if (action === 'edit') {
+                            edit(id);
+                        } else if (action === 'delete') {
+                            remove(id);
+                        }
+                    } else {
+                        alert("Podano błędny numer telefonu. Operacja przerwana.");
+                    }
+                })
+                .catch(error => {
+                    alert("Wystąpił błąd podczas weryfikacji telefonu: " + error.message);
+                });
+        };
+
+        const edit = (id) => {
+            fetch(`api/Rezerwacjas/${id}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Nie znaleziono rezerwacji.");
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    toggleForm('edit');
+                    document.querySelector("button[onclick^='validateAndSubmit']").setAttribute("data-id", id);
+                    document.getElementById("Name").value = data.name;
+                    document.getElementById("Surname").value = data.surname;
+                    document.getElementById("Date").value = data.date;
+                    document.getElementById("TimeFrom").value = data.timeFrom;
+                    document.getElementById("TimeTo").value = data.timeTo;
+                    document.getElementById("Phone").value = data.phone;
+                    document.getElementById("Email").value = data.email;
+                    document.getElementById("Description").value = data.description;
+                })
+                .catch(error => {
+                    alert("Wystąpił błąd podczas edycji rezerwacji: " + error.message);
+                });
+        };
+
+        const update = (id) => {
+            const reservation = {
+                id,
+                name: document.getElementById("Name").value,
+                surname: document.getElementById("Surname").value,
+                date: document.getElementById("Date").value,
+                timeFrom: parseInt(document.getElementById("TimeFrom").value),
+                timeTo: parseInt(document.getElementById("TimeTo").value),
+                phone: document.getElementById("Phone").value,
+                email: document.getElementById("Email").value,
+                description: document.getElementById("Description").value
+            };
+
+            fetch(`api/Rezerwacjas/${id}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reservation)
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(errorData => {
+                            throw new Error(errorData.errors ? Object.values(errorData.errors).flat().join(", ") : "Nie można zaktualizować rezerwacji.");
+                        });
+                    }
+                    alert("Rezerwacja została pomyślnie zaktualizowana.");
+                    toggleForm();
+                    loadRec();
+                })
+                .catch(error => {
+                    alert("Wystąpił błąd podczas aktualizacji rezerwacji: " + error.message);
+                });
+        };
+
+        const remove = (id) => {
+            fetch(`api/Rezerwacjas/${id}`, { method: "DELETE" })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error("Nie można usunąć rezerwacji.");
+                    }
+                    alert("Rezerwacja została pomyślnie usunięta.");
+                    loadRec();
+                })
+                .catch(error => {
+                    alert("Wystąpił błąd podczas usuwania rezerwacji: " + error.message);
+                });
+        };
+
+        const loadRec = () => {
+            fetch("api/Rezerwacjas")
+                .then(response => response.json())
+                .then(data => showRec(data))
+                .catch(error => {
+                    alert("Wystąpił błąd podczas ładowania rezerwacji: " + error.message);
+                });
+        };
+        const read = () => {
+            fetch("api/Rezerwacjas")
+                .then(response => response.json())
+                .then(data => showRec(data))
+                .catch(error => console.log(error));
+        };
+
+        // Initial read
+        read();
+        document.addEventListener("DOMContentLoaded", loadRec);
+    </script>
+</body>
+</html>
